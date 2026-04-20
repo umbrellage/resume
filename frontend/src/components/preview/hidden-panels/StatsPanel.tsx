@@ -1,5 +1,17 @@
 import { useResumeStore } from '../../../store/useResumeStore';
 
+const SECTION_LABELS: Record<string, string> = {
+  education: '教育经历',
+  work: '工作经历',
+  project: '项目经历',
+  skill: '专业技能',
+  certificate: '证书',
+  hobby: '兴趣爱好',
+  award: '获奖荣誉',
+  language: '语言能力',
+  intern: '实习经历',
+};
+
 export default function StatsPanel() {
   const resume = useResumeStore((s) => s.resume);
   if (!resume) return null;
@@ -31,7 +43,7 @@ export default function StatsPanel() {
         <div className="space-y-2">
           {sectionCounts.map((s) => (
             <div key={s.type} className="flex justify-between text-sm">
-              <span className="text-gray-600">{s.type}</span>
+              <span className="text-gray-600">{SECTION_LABELS[s.type] || s.type}</span>
               <span className={s.count > 0 ? 'text-green-600' : 'text-gray-400'}>
                 {s.count} 条
               </span>
