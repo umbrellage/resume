@@ -1,16 +1,5 @@
 import { useResumeStore } from '../../../store/useResumeStore';
-
-const SECTION_LABELS: Record<string, string> = {
-  education: '教育经历',
-  work: '工作经历',
-  project: '项目经历',
-  skill: '专业技能',
-  certificate: '证书',
-  hobby: '兴趣爱好',
-  award: '获奖荣誉',
-  language: '语言能力',
-  intern: '实习经历',
-};
+import { SECTION_LABELS } from './sectionLabels';
 
 export default function StatsPanel() {
   const resume = useResumeStore((s) => s.resume);
