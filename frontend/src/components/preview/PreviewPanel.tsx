@@ -1,4 +1,4 @@
-import { useRef, useCallback, useState, useEffect } from 'react';
+import { useRef, useCallback, useState, useEffect, useLayoutEffect } from 'react';
 import { useResumeStore } from '../../store/useResumeStore';
 import { serializeResumeToHtml } from '../../utils/htmlSerializer';
 import { generatePdf } from '../../utils/pdfClient';
@@ -7,8 +7,7 @@ import StatsPanel from './hidden-panels/StatsPanel';
 
 const A4_WIDTH = 794;
 const A4_HEIGHT = 1123;
-const TEMPLATE_PADDING = 40;
-const CONTENT_AREA_HEIGHT = A4_HEIGHT - TEMPLATE_PADDING * 2;
+const PAGE_PADDING = 40;
 
 interface PreviewPanelProps {
   onSendEmail?: () => void;
@@ -29,6 +28,8 @@ export default function PreviewPanel({ onSendEmail, onScrollContainerReady }: Pr
   const [showDownloadMenu, setShowDownloadMenu] = useState(false);
   const [showToolbar, setShowToolbar] = useState(false);
   const [contentHeight, setContentHeight] = useState(0);
+  const [pageOffsets, setPageOffsets] = useState<number[]>([0]);
+  const [pageClipTops, setPageClipTops] = useState<number[]>([0]);
   const resume = useResumeStore((s) => s.resume);
   const onePageScale = useResumeStore((s) => s.onePageScale);
   const setOnePageScale = useResumeStore((s) => s.setOnePageScale);
@@ -44,7 +45,7 @@ export default function PreviewPanel({ onSendEmail, onScrollContainerReady }: Pr
   // 计算需要多少页 - 基于完整 A4 页面高度
   const pageCount = onePageScale
     ? 1
-    : Math.ceil(Math.max(1, contentHeight) / A4_HEIGHT);
+    : pageOffsets.length;
 
   // 更新缩放比例
   const updateScale = useCallback(() => {
@@ -56,7 +57,69 @@ export default function PreviewPanel({ onSendEmail, onScrollContainerReady }: Pr
     setScale(newScale);
   }, [setScale]);
 
-  // 获取内容高度
+  // 计算智能分页偏移量：在 item 之间分页，避免截断文字
+  useLayoutEffect(() => {
+    if (!contentRef.current || onePageScale !== null) return;
+
+    const container = contentRef.current;
+
+    const getTopRelative = (el: HTMLElement): number => {
+      let top = 0;
+      let current: HTMLElement | null = el;
+      while (current && current !== container) {
+        top += current.offsetTop;
+        current = current.offsetParent as HTMLElement | null;
+      }
+      return top;
+    };
+
+    // 收集 item 级别元素：section > wrapper > (title + items)
+    const items: { top: number; bottom: number }[] = [];
+    container.querySelectorAll('[data-preview-section]').forEach((section) => {
+      const wrapper = section.children[0] as HTMLElement | undefined;
+      if (wrapper && wrapper.children.length > 0) {
+        // 深入到 SectionTitle + 各 item
+        for (let i = 0; i < wrapper.children.length; i++) {
+          const child = wrapper.children[i] as HTMLElement;
+          const top = getTopRelative(child);
+          items.push({ top, bottom: top + child.offsetHeight });
+        }
+      } else {
+        // 没有 wrapper（如 personal section），用 section 本身
+        const el = section as HTMLElement;
+        const top = getTopRelative(el);
+        items.push({ top, bottom: top + el.offsetHeight });
+      }
+    });
+
+    if (items.length === 0) {
+      setPageOffsets([0]);
+      setPageClipTops([0]);
+      setContentHeight(container.scrollHeight);
+      return;
+    }
+
+    const offsets: number[] = [0];
+    const clipTops: number[] = [0];
+    let currentPageEnd = A4_HEIGHT - PAGE_PADDING;
+
+    for (let i = 0; i < items.length; i++) {
+      if (items[i].bottom > currentPageEnd) {
+        const newOffset = items[i].top - PAGE_PADDING;
+        if (newOffset > offsets[offsets.length - 1]) {
+          offsets.push(newOffset);
+          clipTops.push(items[i].top);
+        }
+        currentPageEnd = newOffset + A4_HEIGHT - PAGE_PADDING;
+      }
+    }
+
+    setPageOffsets(offsets);
+    setPageClipTops(clipTops);
+    setContentHeight(container.scrollHeight);
+  }, [onePageScale, resume]);
+
+  // 获取内容高度（ResizeObserver 兜底）
   useEffect(() => {
     if (!contentRef.current || onePageScale !== null) return;
     const updateHeight = () => {
@@ -65,11 +128,8 @@ export default function PreviewPanel({ onSendEmail, onScrollContainerReady }: Pr
       }
     };
 
-    // 使用 ResizeObserver 监听内容变化
     const observer = new ResizeObserver(updateHeight);
     observer.observe(contentRef.current);
-
-    // 初始高度
     updateHeight();
 
     return () => observer.disconnect();
@@ -258,28 +318,34 @@ export default function PreviewPanel({ onSendEmail, onScrollContainerReady }: Pr
                     overflow: 'hidden',
                     position: 'relative',
                     boxSizing: 'border-box',
-                    marginBottom: index < pageCount - 1 ? '16px' : '0',
+                    marginBottom: index < pageCount - 1 ? `${previewMargin}px` : '0',
                   }}
                 >
-                  {/* 视窗内部的内容区域 */}
                   <div
                     style={{
-                      position: 'relative',
-                      height: '100%',
+                      position: 'absolute',
+                      top: -pageOffsets[index],
+                      left: 0,
+                      right: 0,
+                      height: index < pageCount - 1 ? pageClipTops[index + 1] : undefined,
                       overflow: 'hidden',
                     }}
                   >
+                    <ResumeRenderer onePageScale={null} />
+                  </div>
+                  {index > 0 && (
                     <div
                       style={{
                         position: 'absolute',
-                        top: -index * A4_HEIGHT,
+                        top: 0,
                         left: 0,
                         right: 0,
+                        height: PAGE_PADDING,
+                        background: 'white',
+                        zIndex: 1,
                       }}
-                    >
-                      <ResumeRenderer onePageScale={null} />
-                    </div>
-                  </div>
+                    />
+                  )}
                 </div>
               ))}
             </>
