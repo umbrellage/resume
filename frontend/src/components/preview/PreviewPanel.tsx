@@ -158,6 +158,7 @@ export default function PreviewPanel({ onSendEmail, onScrollContainerReady }: Pr
   const fitToOnePage = useCallback(() => {
     if (!contentRef.current) return;
     const contentHeight = contentRef.current.scrollHeight;
+    console.log('[fitToOnePage] contentHeight:', contentHeight, 'A4_HEIGHT:', A4_HEIGHT, 'scale:', A4_HEIGHT / contentHeight);
     const targetScale = A4_HEIGHT / contentHeight;
     setOnePageScale(targetScale);
   }, [setOnePageScale]);
