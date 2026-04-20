@@ -3,6 +3,10 @@ import { useResumeStore } from '../../store/useResumeStore';
 import { serializeResumeToHtml } from '../../utils/htmlSerializer';
 import { generatePdf } from '../../utils/pdfClient';
 import ResumeRenderer from './ResumeRenderer';
+import StatsPanel from './hidden-panels/StatsPanel';
+import TemplatePanel from './hidden-panels/TemplatePanel';
+import ActionsPanel from './hidden-panels/ActionsPanel';
+import OutlinePanel from './hidden-panels/OutlinePanel';
 
 const A4_WIDTH = 794;
 const A4_HEIGHT = 1123;
@@ -168,7 +172,16 @@ export default function PreviewPanel() {
             }}
             data-resume-content
           >
-            <ResumeRenderer />
+            {hidden ? (
+              <div className="w-full h-full flex items-center justify-center">
+                {hiddenPanel === 'stats' && <StatsPanel />}
+                {hiddenPanel === 'templates' && <TemplatePanel />}
+                {hiddenPanel === 'actions' && <ActionsPanel />}
+                {hiddenPanel === 'outline' && <OutlinePanel />}
+              </div>
+            ) : (
+              <ResumeRenderer />
+            )}
           </div>
         </div>
         <div style={{ height: `${A4_HEIGHT * displayScale}px`, width: '100%' }} />
