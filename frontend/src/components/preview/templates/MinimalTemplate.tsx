@@ -285,13 +285,20 @@ export default function MinimalTemplate({ data, onePageScale }: TemplateProps) {
         width: '794px',
         height: isScaled ? '1123px' : 'minHeight: 1123px',
         background: colors.background,
-        padding: '50px 60px',
         fontFamily: fonts.body,
         color: colors.text,
         boxSizing: 'border-box',
         overflow: 'hidden',
       }}
     >
+      <div
+        style={{
+          padding: '50px 60px',
+          transform: isScaled ? `scale(${onePageScale})` : undefined,
+          transformOrigin: 'top left',
+          width: isScaled ? `${794 / onePageScale}px` : '100%',
+        }}
+      >
       {/* Header */}
       <div data-preview-section="personal" style={{ textAlign: 'center', marginBottom: '24px' }}>
         <h1 style={{ fontSize: '24px', fontWeight: '300', margin: 0, color: colors.heading, fontFamily: fonts.heading, letterSpacing: '2px' }}>
@@ -316,6 +323,7 @@ export default function MinimalTemplate({ data, onePageScale }: TemplateProps) {
           <SectionRenderer section={section} />
         </div>
       ))}
+      </div>
     </div>
   );
 }

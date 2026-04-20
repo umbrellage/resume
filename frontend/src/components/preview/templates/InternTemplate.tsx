@@ -245,10 +245,18 @@ export default function InternTemplate({ data, onePageScale }: TemplateProps) {
         fontFamily: fonts.body,
         color: colors.text,
         boxSizing: 'border-box',
-        display: 'flex',
         overflow: 'hidden',
       }}
     >
+      <div
+        style={{
+          transform: isScaled ? `scale(${onePageScale})` : undefined,
+          transformOrigin: 'top left',
+          width: isScaled ? `${794 / onePageScale}px` : '100%',
+          height: '100%',
+          display: 'flex',
+        }}
+      >
       {/* Left Sidebar - 30% */}
       <div
         style={{
@@ -321,6 +329,7 @@ export default function InternTemplate({ data, onePageScale }: TemplateProps) {
             <MainProjectSection items={projSection.items} />
           </div>
         )}
+      </div>
       </div>
     </div>
   );

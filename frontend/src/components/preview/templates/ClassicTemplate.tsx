@@ -322,13 +322,20 @@ export default function ClassicTemplate({ data, onePageScale }: TemplateProps) {
         width: '794px',
         height: isScaled ? '1123px' : 'minHeight: 1123px',
         background: colors.background,
-        padding: spacing.pagePadding,
         fontFamily: fonts.body,
         color: colors.text,
         boxSizing: 'border-box',
         overflow: 'hidden',
       }}
     >
+      <div
+        style={{
+          padding: spacing.pagePadding,
+          transform: isScaled ? `scale(${onePageScale})` : undefined,
+          transformOrigin: 'top left',
+          width: isScaled ? `${794 / onePageScale}px` : '100%',
+        }}
+      >
       {/* Header */}
       <div data-preview-section="personal" style={{ textAlign: 'center', marginBottom: '16px' }}>
         <h1 style={{ fontSize: '26px', fontWeight: 'bold', margin: 0, color: colors.heading, fontFamily: fonts.heading }}>
@@ -353,6 +360,7 @@ export default function ClassicTemplate({ data, onePageScale }: TemplateProps) {
           <SectionRenderer section={section} />
         </div>
       ))}
+      </div>
     </div>
   );
 }

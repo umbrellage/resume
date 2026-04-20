@@ -280,13 +280,20 @@ export default function FreshGradTemplate({ data, onePageScale }: TemplateProps)
         width: '794px',
         height: isScaled ? '1123px' : 'minHeight: 1123px',
         background: colors.background,
-        padding: '42px 52px',
         fontFamily: fonts.body,
         color: colors.text,
         boxSizing: 'border-box',
         overflow: 'hidden',
       }}
     >
+      <div
+        style={{
+          padding: '42px 52px',
+          transform: isScaled ? `scale(${onePageScale})` : undefined,
+          transformOrigin: 'top left',
+          width: isScaled ? `${794 / onePageScale}px` : '100%',
+        }}
+      >
       {/* Header */}
       <div style={{ textAlign: 'center', marginBottom: '18px' }}>
         <h1 style={{ fontSize: '28px', fontWeight: 'bold', margin: 0, color: colors.heading, fontFamily: fonts.heading }}>
@@ -331,6 +338,7 @@ export default function FreshGradTemplate({ data, onePageScale }: TemplateProps)
           </div>
         );
       })}
+      </div>
     </div>
   );
 }
