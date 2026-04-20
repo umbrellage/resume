@@ -7,11 +7,15 @@ import ResumeRenderer from './ResumeRenderer';
 const A4_WIDTH = 794;
 const A4_HEIGHT = 1123;
 
+type HiddenPanelType = 'stats' | 'templates' | 'actions' | 'outline';
+
 export default function PreviewPanel() {
   const containerRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(0.5);
   const [isExporting, setIsExporting] = useState(false);
+  const [hidden, setHidden] = useState(false);
+  const [hiddenPanel, setHiddenPanel] = useState<HiddenPanelType>('stats');
   const resume = useResumeStore((s) => s.resume);
   const onePageScale = useResumeStore((s) => s.onePageScale);
   const setOnePageScale = useResumeStore((s) => s.setOnePageScale);
@@ -113,6 +117,25 @@ export default function PreviewPanel() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
+        )}
+        <button
+          onClick={() => setHidden(!hidden)}
+          className="px-3 py-1.5 text-xs bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors"
+          title={hidden ? '显示预览' : '隐藏预览'}
+        >
+          {hidden ? '显示' : '隐藏'}
+        </button>
+        {hidden && (
+          <select
+            value={hiddenPanel}
+            onChange={(e) => setHiddenPanel(e.target.value as HiddenPanelType)}
+            className="px-2 py-1.5 text-xs border border-gray-200 rounded bg-white text-gray-600"
+          >
+            <option value="stats">统计</option>
+            <option value="templates">模板</option>
+            <option value="actions">操作</option>
+            <option value="outline">大纲</option>
+          </select>
         )}
       </div>
 
