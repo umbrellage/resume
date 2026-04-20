@@ -15,7 +15,7 @@ export default function EducationForm({ sectionIndex, itemIndex }: EducationForm
   const section = resume?.sections[sectionIndex];
   if (!section || !('items' in section)) return null;
   const item = section.items[itemIndex] as {
-    school: string; degree: string; major: string; startDate: string; endDate: string; gpa: string; highlights: string[];
+    school: string; college: string; degree: string; major: string; startDate: string; endDate: string; gpa: string; highlights: string[];
   };
   if (!item) return null;
 
@@ -25,6 +25,7 @@ export default function EducationForm({ sectionIndex, itemIndex }: EducationForm
     <div className="space-y-1">
       <ItemToolbar sectionIndex={sectionIndex} itemIndex={itemIndex} totalItems={section.items.length} />
       <input className={`${ul} font-medium`} value={item.school} onChange={(e) => updateItem(sectionIndex, itemIndex, 'school', e.target.value)} placeholder="学校名称" />
+      <input className={ul} value={item.college || ''} onChange={(e) => updateItem(sectionIndex, itemIndex, 'college', e.target.value)} placeholder="学院（选填）" />
       <div className="grid grid-cols-3 gap-4">
         <select className={ul} value={item.degree} onChange={(e) => updateItem(sectionIndex, itemIndex, 'degree', e.target.value)}>
           <option value="">学历</option>

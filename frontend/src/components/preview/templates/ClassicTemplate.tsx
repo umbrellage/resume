@@ -70,6 +70,7 @@ function EducationSection({ items }: { items: ResumeSection & { type: 'education
             </span>
           </div>
           <div style={{ fontSize: '13px', color: colors.textSecondary, marginTop: '2px' }}>
+            {item.college ? `${item.college}  |  ` : ''}
             {[item.degree, item.major].filter(Boolean).join(' - ')}
             {item.gpa ? `  |  GPA: ${item.gpa}` : ''}
           </div>
@@ -312,7 +313,7 @@ function SectionRenderer({ section }: { section: ResumeSection }) {
   }
 }
 
-export default function ClassicTemplate({ data, onePageScale }: TemplateProps) {
+export default function ClassicTemplate({ data, onePageScale, pageMargin = 40 }: TemplateProps) {
   const { personalInfo: p } = data;
   const s = onePageScale ?? 1;
   const isScaled = onePageScale !== null;
@@ -320,7 +321,8 @@ export default function ClassicTemplate({ data, onePageScale }: TemplateProps) {
     <div
       style={{
         width: '794px',
-        height: isScaled ? '1123px' : 'minHeight: 1123px',
+        height: isScaled ? '1123px' : undefined,
+        minHeight: isScaled ? undefined : '1123px',
         background: colors.background,
         fontFamily: fonts.body,
         color: colors.text,
@@ -330,7 +332,9 @@ export default function ClassicTemplate({ data, onePageScale }: TemplateProps) {
     >
       <div
         style={{
-          padding: spacing.pagePadding,
+          padding: isScaled
+            ? `${pageMargin / onePageScale}px ${pageMargin * 1.25 / onePageScale}px`
+            : `${pageMargin}px ${pageMargin * 1.25}px`,
           transform: isScaled ? `scale(${onePageScale})` : undefined,
           transformOrigin: 'top left',
           width: isScaled ? `${794 / onePageScale}px` : '100%',

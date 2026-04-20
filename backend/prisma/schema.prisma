@@ -22,6 +22,7 @@ model Resume {
   title       String    @default("我的简历")
   templateId  String    @default("classic")
   data        Json
+  pageMargin  Int       @default(20)
   shareToken  String?   @unique
   deletedAt   DateTime?
   createdAt   DateTime  @default(now())

@@ -14,6 +14,7 @@ export interface ResumeData {
   title: string;
   templateId: string;
   data: unknown;
+  pageMargin?: number;
 }
 
 function authHeaders(token: string) {
@@ -49,6 +50,7 @@ export async function updateResume(token: string, id: string, data: {
   title?: string;
   templateId?: string;
   data?: unknown;
+  pageMargin?: number;
 }): Promise<{ resume: ResumeListItem }> {
   const res = await fetch(`${API_BASE}/resumes/${id}`, {
     method: 'PUT',

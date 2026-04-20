@@ -70,6 +70,7 @@ function EducationSection({ items }: { items: ResumeSection & { type: 'education
             </span>
           </div>
           <div style={{ fontSize: '13px', color: colors.textSecondary, marginTop: '3px' }}>
+            {item.college ? `${item.college}  |  ` : ''}
             {[item.degree, item.major].filter(Boolean).join(' - ')}
           </div>
           {item.gpa && (
@@ -247,7 +248,7 @@ function CustomSection({ section }: { section: ResumeSection & { type: 'custom' 
   );
 }
 
-export default function FreshGradTemplate({ data, onePageScale }: TemplateProps) {
+export default function FreshGradTemplate({ data, onePageScale, pageMargin = 42 }: TemplateProps) {
   const { personalInfo: p } = data;
 
   // Reorder sections: Education first, then Projects, then Experience, then Skills, then Certifications
@@ -278,7 +279,8 @@ export default function FreshGradTemplate({ data, onePageScale }: TemplateProps)
     <div
       style={{
         width: '794px',
-        height: isScaled ? '1123px' : 'minHeight: 1123px',
+        height: isScaled ? '1123px' : undefined,
+        minHeight: isScaled ? undefined : '1123px',
         background: colors.background,
         fontFamily: fonts.body,
         color: colors.text,
@@ -288,7 +290,9 @@ export default function FreshGradTemplate({ data, onePageScale }: TemplateProps)
     >
       <div
         style={{
-          padding: '42px 52px',
+          padding: isScaled
+            ? `${pageMargin / onePageScale}px ${pageMargin * 1.24 / onePageScale}px`
+            : `${pageMargin}px ${pageMargin * 1.24}px`,
           transform: isScaled ? `scale(${onePageScale})` : undefined,
           transformOrigin: 'top left',
           width: isScaled ? `${794 / onePageScale}px` : '100%',

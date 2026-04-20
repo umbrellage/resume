@@ -126,13 +126,14 @@ router.get('/:id', async (req: AuthRequest, res: Response) => {
 // POST /api/resumes - Create resume
 router.post('/', async (req: AuthRequest, res: Response) => {
   try {
-    const { title, templateId, data } = req.body;
+    const { title, templateId, data, pageMargin } = req.body;
     const resume = await prisma.resume.create({
       data: {
         userId: req.userId!,
         title: title || '我的简历',
         templateId: templateId || 'classic',
         data: data || {},
+        pageMargin: pageMargin || 20,
       },
     });
     res.json({ resume });
@@ -146,7 +147,7 @@ router.post('/', async (req: AuthRequest, res: Response) => {
 router.put('/:id', async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
-    const { title, templateId, data } = req.body;
+    const { title, templateId, data, pageMargin } = req.body;
 
     // Verify ownership
     const existing = await prisma.resume.findFirst({
@@ -162,6 +163,7 @@ router.put('/:id', async (req: AuthRequest, res: Response) => {
         ...(title !== undefined && { title }),
         ...(templateId !== undefined && { templateId }),
         ...(data !== undefined && { data }),
+        ...(pageMargin !== undefined && { pageMargin }),
       },
     });
     res.json({ resume });

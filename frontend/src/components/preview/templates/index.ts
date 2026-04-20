@@ -8,6 +8,7 @@ import FreshGradTemplate from './FreshGradTemplate';
 export interface TemplateProps {
   data: ResumeData;
   onePageScale?: number | null;
+  pageMargin?: number;
 }
 
 export const templateMap: Record<string, FC<TemplateProps>> = {

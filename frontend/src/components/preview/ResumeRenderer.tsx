@@ -4,10 +4,11 @@ import { templateMap } from './templates';
 export default function ResumeRenderer() {
   const resume = useResumeStore((s) => s.resume);
   const onePageScale = useResumeStore((s) => s.onePageScale);
+  const pageMargin = useResumeStore((s) => s.previewMargin);
 
   if (!resume) return null;
 
   const TemplateComponent = templateMap[resume.templateId] || templateMap['classic'];
 
-  return <TemplateComponent data={resume} onePageScale={onePageScale} />;
+  return <TemplateComponent data={resume} onePageScale={onePageScale} pageMargin={pageMargin} />;
 }

@@ -38,6 +38,7 @@ export interface SummaryItem {
 export interface EducationItem {
   id: string;
   school: string;
+  college: string;
   degree: string;
   major: string;
   startDate: string;

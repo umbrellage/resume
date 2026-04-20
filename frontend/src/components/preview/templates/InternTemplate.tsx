@@ -66,6 +66,11 @@ function SidebarEducationSection({ items }: { items: EducationItem[] }) {
           <div style={{ fontSize: '12px', fontWeight: 'bold', color: '#ffffff' }}>
             {item.school}
           </div>
+          {item.college && (
+            <div style={{ fontSize: '11px', color: '#d0d0d0', marginTop: '1px' }}>
+              {item.college}
+            </div>
+          )}
           <div style={{ fontSize: '11px', color: '#d0d0d0', marginTop: '2px' }}>
             {[item.degree, item.major].filter(Boolean).join(' - ')}
           </div>
@@ -215,7 +220,7 @@ function MainProjectSection({ items }: { items: ProjectItem[] }) {
 
 /* ---- Main Template ---- */
 
-export default function InternTemplate({ data, onePageScale }: TemplateProps) {
+export default function InternTemplate({ data, onePageScale, pageMargin = 40 }: TemplateProps) {
   const { personalInfo: p } = data;
   const sidebarBg = '#2c3e50';
 
@@ -240,7 +245,8 @@ export default function InternTemplate({ data, onePageScale }: TemplateProps) {
     <div
       style={{
         width: '794px',
-        height: isScaled ? '1123px' : 'minHeight: 1123px',
+        height: isScaled ? '1123px' : undefined,
+        minHeight: isScaled ? undefined : '1123px',
         background: colors.background,
         fontFamily: fonts.body,
         color: colors.text,
@@ -262,7 +268,9 @@ export default function InternTemplate({ data, onePageScale }: TemplateProps) {
         style={{
           width: '30%',
           background: sidebarBg,
-          padding: '40px 20px',
+          padding: isScaled
+            ? `${pageMargin / onePageScale}px ${pageMargin / 2 / onePageScale}px`
+            : `${pageMargin}px ${pageMargin / 2}px`,
           boxSizing: 'border-box',
           color: '#ffffff',
         }}
@@ -303,7 +311,9 @@ export default function InternTemplate({ data, onePageScale }: TemplateProps) {
       <div
         style={{
           width: '70%',
-          padding: '40px 30px',
+          padding: isScaled
+            ? `${pageMargin / onePageScale}px ${pageMargin * 0.75 / onePageScale}px`
+            : `${pageMargin}px ${pageMargin * 0.75}px`,
           boxSizing: 'border-box',
         }}
       >

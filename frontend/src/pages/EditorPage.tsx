@@ -21,6 +21,8 @@ export default function EditorPage() {
   const resume = useResumeStore((s) => s.resume);
   const setResume = useResumeStore((s) => s.setResume);
   const onePageScale = useResumeStore((s) => s.onePageScale);
+  const previewMargin = useResumeStore((s) => s.previewMargin);
+  const setPreviewMargin = useResumeStore((s) => s.setPreviewMargin);
   const { token, user } = useAuthStore();
 
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('loading');
@@ -36,7 +38,7 @@ export default function EditorPage() {
   const [emailError, setEmailError] = useState('');
   const autoSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const serverResumeIdRef = useRef<string | null>(null);
-  const lastSavedRef = useRef<string>('');
+  const lastSavedRef = useRef<{ data: string; margin: number }>({ data: '', margin: 20 });
 
   // Load resume from server
   useEffect(() => {
@@ -64,7 +66,9 @@ export default function EditorPage() {
             title: serverResume.title || (serverResume.data as any).title,
           };
           setResume(dataWithTitle);
-          lastSavedRef.current = JSON.stringify(dataWithTitle);
+          const margin = serverResume.pageMargin ?? 20;
+          setPreviewMargin(margin);
+          lastSavedRef.current = { data: JSON.stringify(dataWithTitle), margin };
         }
         serverResumeIdRef.current = id;
         setSaveStatus('idle');
@@ -75,7 +79,7 @@ export default function EditorPage() {
     };
 
     loadResume();
-  }, [id, token, setResume]);
+  }, [id, token, setResume, setPreviewMargin]);
 
   useEffect(() => {
     if (resume && isInitialLoad) {
@@ -89,7 +93,8 @@ export default function EditorPage() {
     if (!hasContent(resume)) return;
 
     const currentData = JSON.stringify(resume);
-    if (currentData === lastSavedRef.current) return;
+    const lastSaved = lastSavedRef.current;
+    if (currentData === lastSaved.data && previewMargin === lastSaved.margin) return;
 
     setSaveStatus('saving');
 
@@ -98,6 +103,7 @@ export default function EditorPage() {
         title: resume.title,
         templateId: resume.templateId,
         data: resume,
+        pageMargin: previewMargin,
       };
 
       if (serverResumeIdRef.current) {
@@ -106,13 +112,13 @@ export default function EditorPage() {
         const { resume: created } = await createResume(token, resumeData);
         serverResumeIdRef.current = created.id;
       }
-      lastSavedRef.current = currentData;
+      lastSavedRef.current = { data: currentData, margin: previewMargin };
       setSaveStatus('saved');
     } catch (err) {
       console.error('Save failed:', err);
       setSaveStatus('error');
     }
-  }, [token, resume]);
+  }, [token, resume, previewMargin]);
 
   // Auto-save with 1.5s debounce
   useEffect(() => {
@@ -131,7 +137,7 @@ export default function EditorPage() {
         clearTimeout(autoSaveTimerRef.current);
       }
     };
-  }, [resume, token, id, isInitialLoad, handleSave]);
+  }, [resume, previewMargin, token, id, isInitialLoad, handleSave]);
 
   const handleSendEmail = async () => {
     if (!token || !resume) return;
