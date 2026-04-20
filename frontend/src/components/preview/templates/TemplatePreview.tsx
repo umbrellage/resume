@@ -17,6 +17,11 @@ interface TemplatePreviewProps {
   templateId: string;
 }
 
+const THUMBNAIL_WIDTH = 180;
+const THUMBNAIL_HEIGHT = 240;
+const A4_WIDTH = 794;
+const A4_HEIGHT = 1123;
+
 export default function TemplatePreview({ templateId }: TemplatePreviewProps) {
   const TemplateComponent = templateComponents[templateId];
   if (!TemplateComponent) return null;
@@ -55,14 +60,18 @@ export default function TemplatePreview({ templateId }: TemplatePreviewProps) {
     updatedAt: new Date().toISOString(),
   };
 
+  const scaleX = THUMBNAIL_WIDTH / A4_WIDTH;
+  const scaleY = THUMBNAIL_HEIGHT / A4_HEIGHT;
+  const scale = Math.min(scaleX, scaleY, 1);
+
   return (
-    <div className="w-full h-full overflow-auto flex items-center justify-center bg-gray-100 p-2">
+    <div className="w-full h-full overflow-hidden flex items-center justify-center bg-gray-50">
       <div
-        className="bg-white shadow-lg"
+        className="bg-white shadow-md"
         style={{
-          width: '794px',
-          minHeight: '1123px',
-          transform: 'scale(0.5)',
+          width: `${A4_WIDTH}px`,
+          minHeight: `${A4_HEIGHT}px`,
+          transform: `scale(${scale})`,
           transformOrigin: 'center center',
         }}
       >
