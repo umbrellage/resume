@@ -234,17 +234,19 @@ export default function InternTemplate({ data, onePageScale }: TemplateProps) {
   if (p.gender) contactParts.push(p.gender);
   if (p.website) contactParts.push(p.website);
 
+  const isScaled = onePageScale !== null;
+
   return (
     <div
       style={{
         width: '794px',
-        minHeight: '1123px',
+        height: isScaled ? '1123px' : 'minHeight: 1123px',
         background: colors.background,
         fontFamily: fonts.body,
-        zoom: (onePageScale ?? 1) < 1 ? onePageScale! : undefined,
         color: colors.text,
         boxSizing: 'border-box',
         display: 'flex',
+        overflow: 'hidden',
       }}
     >
       {/* Left Sidebar - 30% */}

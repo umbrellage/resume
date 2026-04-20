@@ -315,17 +315,18 @@ function SectionRenderer({ section }: { section: ResumeSection }) {
 export default function ClassicTemplate({ data, onePageScale }: TemplateProps) {
   const { personalInfo: p } = data;
   const s = onePageScale ?? 1;
+  const isScaled = onePageScale !== null;
   return (
     <div
       style={{
         width: '794px',
-        minHeight: '1123px',
+        height: isScaled ? '1123px' : 'minHeight: 1123px',
         background: colors.background,
         padding: spacing.pagePadding,
         fontFamily: fonts.body,
         color: colors.text,
         boxSizing: 'border-box',
-        zoom: s < 1 ? s : undefined,
+        overflow: 'hidden',
       }}
     >
       {/* Header */}

@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useResumeStore } from '../store/useResumeStore';
 import { useAuthStore } from '../store/authStore';
@@ -26,7 +26,6 @@ export default function EditorPage() {
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('loading');
   const [isInitialLoad, setIsInitialLoad] = useState(true);
 
-  // Compute displayTitle from resume.title (edited header title) or fall back to personalInfo
   const displayTitle = resume
     ? resume.title || [resume.personalInfo.title, resume.personalInfo.name].filter(Boolean).join('_') || '轻松简历'
     : '轻松简历';
@@ -35,29 +34,24 @@ export default function EditorPage() {
   const [emailSubject, setEmailSubject] = useState('');
   const [isSendingEmail, setIsSendingEmail] = useState(false);
   const [emailError, setEmailError] = useState('');
-  const savedTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const autoSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const serverResumeIdRef = useRef<string | null>(null);
+  const lastSavedRef = useRef<string>('');
 
-  // Load resume from server (skip if already loaded locally)
+  // Load resume from server
   useEffect(() => {
     if (!id) return;
 
-    // If resume is already loaded in store with matching id, skip server fetch
     if (resume && resume.id === id) {
-      serverResumeIdRef.current = null; // locally created, no server ID yet
+      serverResumeIdRef.current = null;
       setSaveStatus('idle');
       setIsInitialLoad(false);
       return;
     }
 
     if (!token) {
-      if (resume) {
-        setSaveStatus('idle');
-        setIsInitialLoad(false);
-      } else {
-        setSaveStatus('error');
-      }
+      setSaveStatus(resume ? 'idle' : 'error');
+      setIsInitialLoad(false);
       return;
     }
 
@@ -70,6 +64,7 @@ export default function EditorPage() {
             title: serverResume.title || (serverResume.data as any).title,
           };
           setResume(dataWithTitle);
+          lastSavedRef.current = JSON.stringify(dataWithTitle);
         }
         serverResumeIdRef.current = id;
         setSaveStatus('idle');
@@ -82,49 +77,19 @@ export default function EditorPage() {
     loadResume();
   }, [id, token, setResume]);
 
-  // Mark initial load as complete after resume is loaded
   useEffect(() => {
     if (resume && isInitialLoad) {
       setIsInitialLoad(false);
     }
   }, [resume, isInitialLoad]);
 
-  // Auto-save when resume changes (after initial load)
-  useEffect(() => {
-    if (!resume || isInitialLoad || !token || !id) return;
-
-    // Clear existing auto-save timer
-    if (autoSaveTimerRef.current) {
-      clearTimeout(autoSaveTimerRef.current);
-    }
-
-    // Set new auto-save timer (debounce 2 seconds)
-    autoSaveTimerRef.current = setTimeout(() => {
-      handleSave();
-    }, 2000);
-
-    return () => {
-      if (autoSaveTimerRef.current) {
-        clearTimeout(autoSaveTimerRef.current);
-      }
-    };
-  }, [resume, token, id, isInitialLoad]);
-
-  // Cleanup timers
-  useEffect(() => {
-    return () => {
-      if (savedTimerRef.current) {
-        clearTimeout(savedTimerRef.current);
-      }
-      if (autoSaveTimerRef.current) {
-        clearTimeout(autoSaveTimerRef.current);
-      }
-    };
-  }, []);
-
-  const handleSave = async () => {
+  // Optimized auto-save: only save when content actually changes
+  const handleSave = useCallback(async () => {
     if (!token || !resume) return;
     if (!hasContent(resume)) return;
+
+    const currentData = JSON.stringify(resume);
+    if (currentData === lastSavedRef.current) return;
 
     setSaveStatus('saving');
 
@@ -141,18 +106,32 @@ export default function EditorPage() {
         const { resume: created } = await createResume(token, resumeData);
         serverResumeIdRef.current = created.id;
       }
+      lastSavedRef.current = currentData;
       setSaveStatus('saved');
-      if (savedTimerRef.current) {
-        clearTimeout(savedTimerRef.current);
-      }
-      savedTimerRef.current = setTimeout(() => {
-        setSaveStatus('idle');
-      }, 2000);
     } catch (err) {
       console.error('Save failed:', err);
       setSaveStatus('error');
     }
-  };
+  }, [token, resume]);
+
+  // Auto-save with 1.5s debounce
+  useEffect(() => {
+    if (!resume || isInitialLoad || !token || !id) return;
+
+    if (autoSaveTimerRef.current) {
+      clearTimeout(autoSaveTimerRef.current);
+    }
+
+    autoSaveTimerRef.current = setTimeout(() => {
+      handleSave();
+    }, 1500);
+
+    return () => {
+      if (autoSaveTimerRef.current) {
+        clearTimeout(autoSaveTimerRef.current);
+      }
+    };
+  }, [resume, token, id, isInitialLoad, handleSave]);
 
   const handleSendEmail = async () => {
     if (!token || !resume) return;
@@ -161,7 +140,6 @@ export default function EditorPage() {
     setEmailError('');
 
     try {
-      // 使用智能一页的缩放设置（如果已设置）
       const html = serializeResumeToHtml(resume, onePageScale);
       await sendResumeEmail(token, emailTo, emailSubject || resume.personalInfo.name || '我的简历', html);
       setShowEmailModal(false);

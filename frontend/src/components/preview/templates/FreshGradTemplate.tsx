@@ -272,17 +272,19 @@ export default function FreshGradTemplate({ data, onePageScale }: TemplateProps)
     .filter((s) => s.type === 'custom')
     .forEach((s) => reorderedSections.push(s));
 
+  const isScaled = onePageScale !== null;
+
   return (
     <div
       style={{
         width: '794px',
-        minHeight: '1123px',
+        height: isScaled ? '1123px' : 'minHeight: 1123px',
         background: colors.background,
         padding: '42px 52px',
-        zoom: (onePageScale ?? 1) < 1 ? onePageScale! : undefined,
         fontFamily: fonts.body,
         color: colors.text,
         boxSizing: 'border-box',
+        overflow: 'hidden',
       }}
     >
       {/* Header */}

@@ -22,6 +22,8 @@ export default function SplitEditor({ saveStatus = 'idle', onSave, onShowLogin, 
   const previewRef = useRef<HTMLDivElement>(null);
   const ticking = useRef(false);
   const editorStyle = useResumeStore((s) => s.editorStyle);
+  const hiddenEditor = useResumeStore((s) => s.hiddenEditor);
+  const setHiddenEditor = useResumeStore((s) => s.setHiddenEditor);
 
   const syncScroll = useCallback(() => {
     const editor = editorRef.current;
@@ -88,13 +90,28 @@ export default function SplitEditor({ saveStatus = 'idle', onSave, onShowLogin, 
 
   return (
     <div className="h-screen flex flex-col bg-gray-50">
-      <Header saveStatus={saveStatus} onSave={onSave} onShowLogin={onShowLogin} onSendEmail={onSendEmail} showBack={showBack} editableTitle={editableTitle} title={title} onTitleChange={onTitleChange} />
+      <Header
+        saveStatus={saveStatus}
+        onSave={onSave}
+        onShowLogin={onShowLogin}
+        onSendEmail={onSendEmail}
+        showBack={showBack}
+        editableTitle={editableTitle}
+        title={title}
+        onTitleChange={onTitleChange}
+        onToggleEditor={() => setHiddenEditor(!hiddenEditor)}
+        editorHidden={hiddenEditor}
+        showEditorControls={true}
+      />
       <div className="flex flex-1 overflow-hidden">
-        <div ref={editorRef} className={`w-1/2 border-r ${editorStyle === 'flat' ? 'border-gray-100' : 'border-gray-200'} ${editorStyle === 'flat' ? 'bg-white' : 'bg-gray-50'} overflow-y-auto`}>
-          <EditorPanel editorStyle={editorStyle} />
+        <div
+          ref={editorRef}
+          className={`border-r transition-all duration-300 ${editorStyle === 'flat' ? 'border-gray-100' : 'border-gray-200'} ${editorStyle === 'flat' ? 'bg-white' : 'bg-gray-50'} overflow-y-auto ${hiddenEditor ? 'w-0 p-0 border-0' : 'w-1/2 p-0'}`}
+        >
+          {!hiddenEditor && <EditorPanel editorStyle={editorStyle} />}
         </div>
-        <div ref={previewRef} className="w-1/2 overflow-y-auto bg-gray-100">
-          <PreviewPanel />
+        <div ref={previewRef} className={`overflow-y-auto bg-gray-100 transition-all duration-300 ${hiddenEditor ? 'w-full' : 'w-1/2'}`}>
+          <PreviewPanel onSendEmail={onSendEmail} />
         </div>
       </div>
     </div>

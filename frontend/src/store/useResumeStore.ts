@@ -21,6 +21,10 @@ interface ResumeStore {
   activeSection: string | null;
   isExporting: boolean;
   onePageScale: number | null;
+  hiddenPreview: boolean;
+  hiddenEditor: boolean;
+  previewMargin: number;
+  scale: number;
   editorStyle: EditorStyle;
   setEditorStyle: (style: EditorStyle) => void;
 
@@ -43,6 +47,10 @@ interface ResumeStore {
   setIsExporting: (v: boolean) => void;
   setActiveSection: (section: string | null) => void;
   setOnePageScale: (scale: number | null) => void;
+  setHiddenPreview: (hidden: boolean) => void;
+  setHiddenEditor: (hidden: boolean) => void;
+  setPreviewMargin: (margin: number) => void;
+  setScale: (scale: number) => void;
   resetResume: () => void;
 }
 
@@ -75,6 +83,10 @@ export const useResumeStore = create<ResumeStore>()(
       activeSection: null,
       isExporting: false,
       onePageScale: null,
+      hiddenPreview: false,
+      hiddenEditor: false,
+      previewMargin: 20,
+      scale: 0.5,
       editorStyle: 'flat',
 
       initResume: () => set({ resume: createDefaultResume() }),
@@ -296,6 +308,10 @@ export const useResumeStore = create<ResumeStore>()(
       setEditorStyle: (style) => set({ editorStyle: style }),
       setActiveSection: (section) => set({ activeSection: section }),
       setOnePageScale: (scale) => set({ onePageScale: scale }),
+      setHiddenPreview: (hidden) => set({ hiddenPreview: hidden }),
+      setHiddenEditor: (hidden) => set({ hiddenEditor: hidden }),
+      setPreviewMargin: (margin) => set({ previewMargin: margin }),
+      setScale: (scale) => set({ scale }),
       resetResume: () => set({ resume: createDefaultResume() }),
     }),
     {
@@ -303,10 +319,13 @@ export const useResumeStore = create<ResumeStore>()(
       partialize: (state) => ({
         resume: state.resume ? {
           ...state.resume,
-          // Don't persist updatedAt to avoid constant re-renders during editing
           updatedAt: undefined
         } : null,
         editorStyle: state.editorStyle,
+        hiddenPreview: state.hiddenPreview,
+        onePageScale: state.onePageScale,
+        hiddenEditor: state.hiddenEditor,
+        previewMargin: state.previewMargin,
       }),
     }
   )

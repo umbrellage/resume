@@ -56,8 +56,16 @@ export default function TemplatePreview({ templateId }: TemplatePreviewProps) {
   };
 
   return (
-    <div className="w-full h-full overflow-hidden bg-white">
-      <div style={{ transform: 'scale(0.25)', transformOrigin: 'top left', width: '400%', height: '400%', pointerEvents: 'none' }}>
+    <div className="w-full h-full overflow-auto flex items-center justify-center bg-gray-100 p-2">
+      <div
+        className="bg-white shadow-lg"
+        style={{
+          width: '794px',
+          minHeight: '1123px',
+          transform: 'scale(0.5)',
+          transformOrigin: 'center center',
+        }}
+      >
         <TemplateComponent data={previewData} />
       </div>
     </div>
