@@ -276,7 +276,7 @@ export default function InternTemplate({ data, onePageScale, pageMargin = 40 }: 
         }}
       >
         {/* Name in sidebar */}
-        <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+        <div data-preview-section="personal" style={{ paddingTop: '30px', textAlign: 'center', marginBottom: '20px' }}>
           <h1 style={{ fontSize: '20px', fontWeight: 'bold', margin: 0, color: '#ffffff', fontFamily: fonts.heading }}>
             {p.name || '你的姓名'}
           </h1>

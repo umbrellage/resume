@@ -299,7 +299,7 @@ export default function FreshGradTemplate({ data, onePageScale, pageMargin = 42 
         }}
       >
       {/* Header */}
-      <div style={{ textAlign: 'center', marginBottom: '18px' }}>
+      <div data-preview-section="personal" style={{ paddingTop: '30px', textAlign: 'center', marginBottom: '18px' }}>
         <h1 style={{ fontSize: '28px', fontWeight: 'bold', margin: 0, color: colors.heading, fontFamily: fonts.heading }}>
           {p.name || '你的姓名'}
         </h1>
