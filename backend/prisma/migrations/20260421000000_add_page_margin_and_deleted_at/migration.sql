@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE `Resume` ADD COLUMN `pageMargin` INTEGER NOT NULL DEFAULT 20;
+ALTER TABLE `Resume` ADD COLUMN `deletedAt` DATETIME(3) NULL;
