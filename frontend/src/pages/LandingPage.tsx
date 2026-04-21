@@ -133,7 +133,7 @@ export default function LandingPage() {
 
       {/* Footer */}
       <footer className="border-t border-gray-100 py-8 text-center text-sm text-gray-400">
-        轻松简历 © 2024
+        轻松简历 © {new Date().getFullYear()}
       </footer>
     </div>
   );
