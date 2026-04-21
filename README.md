@@ -60,16 +60,48 @@ cd frontend && npm install
 cd ../backend && npm install
 ```
 
-### 2. 配置数据库
+### 2. 配置后端环境变量
 
 ```bash
 cd backend
-cp prisma/.env.example prisma/.env
-# 编辑 prisma/.env，设置 DATABASE_URL
+cp prisma/.env.example .env
+```
+
+编辑 `.env`，填写以下配置：
+
+```env
+# 数据库连接（必填）
+DATABASE_URL="mysql://用户名:密码@数据库地址:3306/resume_db"
+
+# JWT 密钥（必填，生产环境请使用随机字符串）
+JWT_SECRET="your-secret-key-change-in-production"
+
+# SMTP 邮件服务（选填，不配置则邮件功能不可用）
+SMTP_HOST="smtp.163.com"
+SMTP_PORT="465"
+SMTP_USER="your-email@163.com"
+SMTP_PASS="your-smtp-password"
+SMTP_FROM="your-email@163.com"
+
+# 服务端口（默认 3002）
+PORT=3002
+```
+
+### 3. 初始化数据库
+
+```bash
+cd backend
+
+# 方式一：使用 Prisma 迁移（推荐，生产环境用）
+npx prisma migrate deploy
+
+# 方式二：开发环境快速同步
 npx prisma db push
 ```
 
-### 3. 启动开发服务器
+迁移会自动创建 `User` 和 `Resume` 两张表。
+
+### 4. 启动开发服务器
 
 ```bash
 # 前端（端口 5174）
@@ -81,11 +113,57 @@ cd backend && npm run dev
 
 访问 http://localhost:5174
 
-### 4. 生产构建
+## 生产部署
+
+### 1. 构建前端
 
 ```bash
 cd frontend && npm run build
+```
+
+产物在 `frontend/dist/`，由 Nginx 托管静态文件。
+
+### 2. 构建并启动后端
+
+```bash
 cd backend && npm run build
+node dist/index.js
+```
+
+建议使用 PM2 管理进程：
+
+```bash
+pm2 start dist/index.js --name resume-api
+```
+
+### 3. 执行数据库迁移
+
+```bash
+cd backend && npx prisma migrate deploy
+```
+
+### 4. Nginx 配置参考
+
+```nginx
+server {
+    listen 80;
+    server_name your-domain.com;
+
+    # 前端静态文件
+    location / {
+        root /path/to/resume/frontend/dist;
+        index index.html;
+        try_files $uri $uri/ /index.html;
+    }
+
+    # 后端 API 反向代理
+    location /api/ {
+        proxy_pass http://127.0.0.1:3002;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+}
 ```
 
 ## 编辑器双风格
